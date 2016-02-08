@@ -8,7 +8,7 @@ def outcomes(num_spun):
 
 
 def yankFrom(string, char):
-    return string.replace(char, '')
+    return string.replace(char, '', 1)
 
 
 def optimize(outcome, stat):
@@ -23,7 +23,7 @@ def score(outcome):
     gimels = outcome.count('G')
     nuns = outcome.count('N')
     shins = outcome.count('S')
-    return { "successes": max(gimels - nuns, 0), "complications": shins }
+    return {"successes": max(gimels - nuns, 0), "complications": shins}
 
 
 def has(min_successes, max_shins):
@@ -39,9 +39,15 @@ triple_success = has(3, 100)
 uncomplicated_success = has(1, 0)
 
 
+def results(num_dreidels, stat):
+    return [optimize(spin, stat) for spin in outcomes(num_dreidels)]
+
+
 def chance_of(num_dreidels, stat, condition):
-    spins = outcomes(num_dreidels)
-    return num_which([optimize(spin, stat) for spin in spins], condition) / float(len(spins))
+    possibles = results(num_dreidels, stat)
+    return sum(condition(elem) == 1 for elem in possibles) / float(len(possibles))
+
+#def avg_complications(num_dreidels, stat, condition):
 
 
 def report_chance(num_dreidels, condition_name, condition):
