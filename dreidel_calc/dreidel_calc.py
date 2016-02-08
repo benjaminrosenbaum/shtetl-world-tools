@@ -62,12 +62,18 @@ def report_chance(num_dreidels, condition_name, condition):
     return "chance of {0}:\t\t".format(condition_name) + "\t\t".join(["{0:.1f}%".format(100 * chance) for chance in chances])
 
 
+def report_avg_complications(num_dreidels):
+    avgs = [avg_complications_for_success(num_dreidels, stat) for stat in [0, 1, 2]]
+    return "average complications for success:\t" + "\t\t".join(["{0:.0f}".format(avg) for avg in avgs])
+
+
 def main():
-    for d in [1, 2, 3, 4, 5, 6, 7, 8]:
+    for d in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
         print ("\nfor {0} dreidels:\t\t\t\tSTAT=0\t\tSTAT=1\t\tSTAT=2".format(d))
         for c in [("simple_success", simple_success), ("success w/o compl", uncomplicated_success),
                   ("double_success", double_success), ("triple_success", triple_success)]:
             print(report_chance(d, c[0], c[1]))
+        print(report_avg_complications(d))
         print("")
 
 
