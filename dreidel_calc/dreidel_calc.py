@@ -43,11 +43,18 @@ def results(num_dreidels, stat):
     return [optimize(spin, stat) for spin in outcomes(num_dreidels)]
 
 
-def chance_of(num_dreidels, stat, condition):
-    possibles = results(num_dreidels, stat)
-    return sum(condition(elem) == 1 for elem in possibles) / float(len(possibles))
+def avg_over_possibles(possibles, func):
+    return sum(func(outcome) for outcome in possibles) / float(len(possibles))
 
-#def avg_complications(num_dreidels, stat, condition):
+
+def chance_of(num_dreidels, stat, condition):
+    return avg_over_possibles(results(num_dreidels, stat), condition)
+
+
+def avg_complications_for_success(num_dreidels, stat):
+    return avg_over_possibles(
+        [result for result in results(num_dreidels, stat) if score(result)["successes"] > 0],
+        lambda outcome: score(outcome)["complications"])
 
 
 def report_chance(num_dreidels, condition_name, condition):
