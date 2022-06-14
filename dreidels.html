@@ -1,0 +1,188 @@
+
+<html>
+<head>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+<script type="text/javascript" src="http://code.jquery.com/ui/1.9.0/jquery-ui.js"></script>
+<link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.9.0/themes/base/jquery-ui.css" />
+</head>
+<body>
+
+<script>
+
+//jQuery UI Touch Punch 0.2.2, Copyright 2011, Dave Furfero, Dual licensed under the MIT or GPL Version 2 licenses.
+(function(b){b.support.touch="ontouchend" in document;if(!b.support.touch){return;}var c=b.ui.mouse.prototype,e=c._mouseInit,a;function d(g,h){if(g.originalEvent.touches.length>1){return;}g.preventDefault();var i=g.originalEvent.changedTouches[0],f=document.createEvent("MouseEvents");f.initMouseEvent(h,true,true,window,1,i.screenX,i.screenY,i.clientX,i.clientY,false,false,false,false,0,null);g.target.dispatchEvent(f);}c._touchStart=function(g){var f=this;if(a||!f._mouseCapture(g.originalEvent.changedTouches[0])){return;}a=true;f._touchMoved=false;d(g,"mouseover");d(g,"mousemove");d(g,"mousedown");};c._touchMove=function(f){if(!a){return;}this._touchMoved=true;d(f,"mousemove");};c._touchEnd=function(f){if(!a){return;}d(f,"mouseup");d(f,"mouseout");if(!this._touchMoved){d(f,"click");}a=false;};c._mouseInit=function(){var f=this;f.element.bind("touchstart",b.proxy(f,"_touchStart")).bind("touchmove",b.proxy(f,"_touchMove")).bind("touchend",b.proxy(f,"_touchEnd"));e.call(f);};})(jQuery);
+
+
+var dragging = false;
+
+var values = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+var letters = ["&#1490", "&#1504;", "&#1492;","&#64298"];  	
+var names = ["GIMEL", "&nbsp;NUN&nbsp;", "&nbsp;HAY&nbsp;","&nbsp;SHIN"];  		
+
+function draw(d)
+{
+  var value = values[d];
+  return "<span class='big'>" + letters[value] + "</span><span class='small'>"+ names[value] + "</span></div>";
+}
+
+function getId(dreidel)
+{
+  return parseInt($(dreidel).attr('id').substring(1));
+}
+
+function refresh()
+{
+  $(".dreidel").each( function(index) { 
+	  $(this).html(draw(getId(this))); 
+    });
+}
+
+function evaluate()
+{
+  var successes = 0;
+  var complications = 0;
+	
+ $(".dreidel.spinner").each( function(index) { 
+      var value = getValue(this);	  
+	  if (value == 0) successes++;
+	  if (value == 1) successes--;
+	  if (value == 3) complications++;	  
+    });	
+	
+ $("#eval").text(Math.max(successes, 0) + " successes, " + complications + " complications");
+}
+
+function spin()
+{
+   for (var i=0; i<10; i++)
+   {	   
+     $(".dreidel.spinner").animate({left:'+=5px'}, 10);
+     $(".dreidel.spinner").animate({left:'-=5px'}, 10);
+   }
+   $(".dreidel.spinner").each( function(index) { 
+      setValue(this, Math.floor(Math.random()*4));
+    });	
+	refresh();
+	evaluate();
+}
+
+function setValue(dreidel, value)
+{
+   values[getId(dreidel)] = value;
+}
+
+function getValue(dreidel)
+{
+ return  values[getId(dreidel)];
+}
+
+
+function handleDrop(event, ui)
+{
+	
+	var destination = $(this).attr('id');	
+	ui.draggable.removeClass('cache');
+	ui.draggable.removeClass('spinner');
+	ui.draggable.addClass(destination);
+	evaluate();	
+}
+
+  $( 
+	  function() 
+	  { 
+	    for (var d = 0; d < values.length; d++)
+		{					
+			$('#cache').append("<div class='dreidel cache' id ='d" + d + "'></div>");  
+		}
+		refresh();
+	  	
+		 $(".dreidel")
+			//.click(function(e){	if (!dragging){setValue(this, 3); refresh();} })
+			.draggable( { cursor: "move", revert: false, 
+				start: function(event, ui) { $(this).data('inDrag', true); dragging = true;},
+				stop: function(event, ui) { dragging = false;}
+			});
+			
+		  $(".surface")
+			.droppable( { hoverClass: 'hovered', accept: ".dreidel", drop: handleDrop});
+		
+	  } 
+   );
+</script>
+
+<style>
+.surface {
+	height: 40%;
+	margin: 10px 10px 0px 10px; 
+	padding: 5px;
+    position: relative;	
+	font-size: 100%;	
+}
+
+#game { width: 700px; height: 100%; }
+
+#spinner { 
+	border: 1px solid blue;
+}
+#cache { 
+	border: 1px solid green; 
+}
+input { margin-left: 10px;  }
+
+.dreidel 
+{
+  /*width: 8%;  TODO responsive design*/
+  width: 50px; 
+  height: 95px;
+  background-image: url('dreidel.png');
+  float: left;
+}
+
+.dreidel .big
+{
+  position: relative;
+  left: 12px;
+  top: 18px; 
+  font-size: 45px;
+  /* TODO responsive design left: 20%;  top: 20%;  font-size: 275%; */
+  font-weight: bold;
+}
+
+.dreidel .small
+{
+  position: relative;
+  display: block;
+  left: 8px;
+  top: 8px; 
+  font-size: 10px;
+  font-weight: bold;
+}
+
+#eval {
+  font-size: 100%;  /* font-size: small; */
+  position: absolute;
+  right:2%;  /* 5 */
+  bottom: 0;
+  color: rgb(85, 88, 92);
+}
+
+
+</style>
+<div id='game'>
+	<div id='spinner' class='surface'>
+	  <p>
+		Drag dreidels here to spin them.
+	  </p>
+	  <p id='eval'></p>
+	  <br/>
+	  
+	</div>
+	<input type='button' value='Spin' onclick='spin()' />
+	<div id='cache'  class='surface'>
+	  <p>
+		Drag dreidels here to discard them. (After spinning, you can discard a number of dreidels up to your relevant stat.)
+	  </p>
+	  <br/>
+	</div>
+</div>
+</body>

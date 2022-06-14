@@ -68,7 +68,7 @@ def report_avg_complications(num_dreidels):
 
 
 def main():
-    for d in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
+    for d in [n + 1 for n in range(12)]:
         print ("\nfor {0} dreidels:\t\t\t\tSTAT=0\t\tSTAT=1\t\tSTAT=2".format(d))
         for c in [("simple_success", simple_success), ("success w/o compl", uncomplicated_success),
                   ("double_success", double_success), ("triple_success", triple_success)]:
